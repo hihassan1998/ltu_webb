@@ -45,7 +45,10 @@ caption {
 }
 
 /* Stilar table-head med id */
-#th {
+#th1 {
+    border-bottom: 2px solid #000000;
+}
+#th2 {
     border-bottom: 2px solid #000000;
 }
 
