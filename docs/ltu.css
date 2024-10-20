@@ -1,0 +1,73 @@
+/**ltu.css*/
+
+/** Typsnitt för rubriker */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/**Typsnitt för övrig text */
+p,
+ul,
+table {
+    text-align: left;
+    font-family: Candara, Verdana, sans-serif;
+}
+
+/** Stilar för första ul lista */
+.lista {
+    list-style-type: none;
+}
+
+/**Stilar för tabeller */
+
+/* stiller för tabel 1 */
+caption {
+    font-weight: bold;
+    text-align: left;
+}
+
+.tabell1 {
+    background-color: #ffcccc;
+    border: 2px solid #000000;
+    padding: 10px;
+}
+
+/*stiller för tabel 2 */
+.tabell2 {
+    background-color: #ffcc99;
+    border: 2px solid #000000;
+    padding: 10px;
+}
+
+/* Stilar table-head med id */
+#th {
+    border-bottom: 2px solid #000000;
+}
+
+.foot {
+    z-index: 999;
+    background-color: #000000c4;
+    color: white;
+}
+
+
+/** Stilar för source */
+#source {
+    color: #009900;
+    text-align: right;
+}
+
+/** Stilar för länkar */
+a {
+    color: blue;
+}
+
+a:hover {
+    /* Bakgrundsfärg vid hover */
+    color: purple;
+}
