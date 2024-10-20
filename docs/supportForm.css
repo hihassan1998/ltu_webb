@@ -1,0 +1,29 @@
+/**supportForm.css */
+
+/* Stilar för labeller */ 
+label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Stilar för formulär input */
+input[type="text"],
+textarea {
+    width: 40%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+/* Stilar för radio knapp */
+.radio-group {
+    margin-top: 5px;
+}
+
+/* Stilar för radio knapp labeller */
+.radio-group label {
+    display: inline-block;
+    margin-right: 20px;
+    cursor: pointer;
+}

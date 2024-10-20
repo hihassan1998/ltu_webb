@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supportformulär</title>
+    <!-- Länk till supportform css-fil -->
+    <link rel="stylesheet" href="supportForm.css">
+</head>
+
+<body>
+    <h1>Skicka ett ärende till supporten</h1>
+    <p>Här kan du skicka ett ärende till vår supportavdelning.</p>
+    <form action="https://swplayground.ltu.se/resources/parse_form.php" method="POST">
+        <label for="namn">Ditt namn:</label>
+        <input type="text" id="namn" name="namn" required>
+
+        <label for="telefon">Telefon:</label>
+        <input type="text" id="telefon" name="telefon" required>
+
+        <label for="prioritet">Prioritet:</label>
+        <select id="prioritet" name="prioritet" required>
+            <option value="1">Låg</option>
+            <option value="2">Normal</option>
+            <option value="3">Hög</option>
+        </select>
+
+        <label>Tilldela till ort:</label>
+        <div class="radio-group">
+            <input type="radio" id="ort1" name="ort" value="gbg">
+            <label for="ort1">Göteborg</label>
+
+            <input type="radio" id="ort2" name="ort" value="sthlm">
+            <label for="ort2">Stockholm</label>
+
+            <input type="radio" id="ort3" name="ort" value="ume">
+            <label for="ort3">Umeå</label>
+
+            <input type="radio" id="ort4" name="ort" value="lule">
+            <label for="ort4">Luleå</label>
+        </div>
+
+
+        <label for="kategori">Kategorin:</label>
+        <select id="kategori" name="kategori" required>
+            <option value="fakt">Fakturering</option>
+            <option value="net">Internet</option>
+            <option value="tel">Telefoni</option>
+            <option value="epost">E-post</option>
+        </select>
+
+        <label for="rubrik">Rubrik:</label>
+        <input type="text" id="rubrik" name="rubrik" required>
+
+        <label for="beskrivning">Beskrivning:</label>
+        <textarea id="beskrivning" name="beskrivning" required></textarea> <br>
+        <input type="submit" name="skicka" value="Submit">
+        <input type="reset" value="Reset">
+    </form>
+</body>
+
+</html>
