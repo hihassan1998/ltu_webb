@@ -1,0 +1,49 @@
+body {
+    padding-top: 4em !important;
+    padding-bottom: 2em !important;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+h1{
+    font-family: fantasy;
+
+}
+main{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+}
+.dice-container img {
+    width: 50px;
+    margin: 10px;
+}
+footer {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+}
+
+.page-header{
+    margin: 75px 0 20px !important;
+}
+.btn-custom-black{
+    margin-top: 25px;
+    background-color: gray;
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 5px;
+    border: 2px solid black;
+}
+.btn-custom-black:hover{
+    color: black;
+    background-color: white;
+}
