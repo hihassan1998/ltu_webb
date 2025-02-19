@@ -2,32 +2,135 @@
 
 <div class="container" role="home">
     <div class="page-header">
-        <h1>Hassans Yahtzee Game</h1>
-        <h3>Welcome to the Dice Game! Roll the dice and test your luck. Click the 'Roll Dice' button to see the new results and get started on your next move</h3>
+        <h1>Hassan's Yahtzee Game</h1>
+        <h2>⚀⚁⚂⚃⚄⚅</h2>
+        <h3>Welcome to the Dice Game! Roll the dice and test your luck. Click the 'Roll Dice' button to see the new
+            results and get started on your next move</h3>
     </div>
-    <h1>Your Current Hand</h1>
-    <div id="dice-container" class="dice-container">
-        {% for die in hand.dice %}
-        <img src="{{ url_for('static', filename='img/' + die.get_name() + '.jpg') }}" alt="{{ die.get_name() }}">
-        {% endfor %}
+    <div class="game-contianer">
+
+        <div id="dice-container" class="dice-container">
+            <h1>Your Current Hand</h1>
+            <br>
+            <br>
+            {% if hand %}
+            <form method="POST" action="/~hahi24/dbwebb-kurser/oopython/me/kmom04/yahtzee3/app.cgi">
+                {% for die in hand.dice %}
+                <div class="dice-container-mini">
+
+                    <img src="{{ url_for('static', filename='img/' + die.get_name() + '.jpg') }}"
+                        alt="{{ die.get_name() }}" class="dice-image" id="dice-{{ loop.index }}"
+                        data-die-id="{{ die.id }}">
+                    <div>
+                        <input class="dice-checkbox" type="checkbox" name="chosen_dice" value="{{ loop.index0 }}"
+                            class="dice-checkbox">
+                    </div>
+                </div>
+                {% endfor %}
+                <br>
+                <p>Note: You can re-roll the selected dice a maximum of 2 times</p>
+                <button type="submit" id="submit-choices" class="btn btn-custom-black" {% if roll_counter>= 2 or
+                    game_over %}disabled{% endif %}>
+                    Roll Selected Dice 🎲
+                </button>
+
+            </form>
+            {% else %}
+            <p>No dice rolled yet. Click the button to start!</p>
+            <p>
+                <strong>Game Rules:</strong><br>
+                Ones, Twos, Threes, Fours, Fives, Sixes, Three of a Kind, Four of a Kind, Full House, Small Straight,
+                Large
+                Straight, Yahtzee, Chance. <br><br>
+                See the <a href="/about">About page</a> for details.
+            </p>
+            {% endif %}
+            <button id="roll-dice" class="btn btn-custom-black" {% if game_over %}disabled{% endif %}>Roll Dice
+                🎲</button>
+        </div>
+        <div class="">
+            {% if score %}
+            <form method="POST" action="/~hahi24/dbwebb-kurser/oopython/me/kmom04/yahtzee3/app.cgi">
+                <div class="scoreboard">
+                    <h1>Scoreboard</h1>
+                    <table id="scoreboard-table">
+                        <thead>
+                            <tr style="background-color: #d4d2d2;">
+                                <th>Rule Name</th>
+                                <th>Score</th>
+                                <th>Choose to Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rule_name, points in score.items() %}
+                            <tr>
+                                <td>{{ rule_name }}</td>
+                                <td>
+                                    {% if rule_name in used_rules_scores %}
+                                    {{ used_rules_scores[rule_name] }}
+                                    {% else %}
+                                    {{ 0 }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if rule_name not in used_rules %}
+                                    <input class="hoverable dice-checkbox" type="radio" name="rule_name"
+                                        value="{{ rule_name }}" id="rule-{{ rule_name }}">
+                                    <label> (Value: {{ points }})</label>
+                                    {% else %}
+                                    <span>Already Scored</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: #d4d2d2;">
+                                <td><strong>Total Points</strong></td>
+                                <td colspan="2"><strong>{{ total_points }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% if game_over %}
+                <h2>Game Over! Your final score: {{ total_points }}</h2>
+                {% else %}
+                <button type="submit" class="btn btn-custom-black">Submit Score</button>{% endif %}
+                <!-- <button type="submit" class="btn btn-custom-black">Submit Score</button> -->
+            </form>
+            {% else %}
+            <br><br>
+            <p><strong>Note:</strong> No dice data passing through to the frontend, therefore no score data to display!
+            </p>
+            {% endif %}
+        </div>
     </div>
 
-    <button id="roll-dice" class="btn btn-custom-black">Roll Dice</button>
+
+    <!-- {% if game_over %}
+    <h2>Game Over! Your final score: {{ total_points }}</h2>
+    {% endif %} -->
 </div>
 
 {% include 'footer.html' %}
 
-<script
-src="https://code.jquery.com/jquery-3.7.1.min.js"
-integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-crossorigin="anonymous">
-</script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#roll-dice').click(function() {
-            $.get('{{ url_for("index", roll=True) }}', function(data) {
-                $('#dice-container').html($(data).find('#dice-container').html());
+    $(document).ready(function () {
+        $('#dice-container').on('click', '.dice-image', function () {
+            $(this).toggleClass('selected');
+            let checkbox = $(this).next('div').find('input[type="checkbox"]');
+            checkbox.prop('checked', !checkbox.prop('checked'));
+        });
+
+        $('#roll-dice').click(function () {
+            $.get('{{ url_for("main", roll=True) }}', function (data) {
+                let newContent = $(data);
+                $('#dice-container').html(newContent.find('#dice-container').html());
+                $('#total-points').html(newContent.find('#total-points').html());
+                $('#scores-raw').html(newContent.find('#scores-raw').html());
             });
         });
     });
