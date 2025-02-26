@@ -1,0 +1,9 @@
+005: Ordprecision: 30.77%, Teckenprecision: 0.00%
+Hassan_test: Ordprecision: 24.00%, Teckenprecision: 19.80%
+check_space: Ordprecision: 76.00%, Teckenprecision: 75.25%
+had_problem: Ordprecision: 0.00%, Teckenprecision: 0.00%
+Hassan_check: Ordprecision: 8.00%, Teckenprecision: 7.92%
+q: Ordprecision: 0.00%, Teckenprecision: 1.98%
+55: Ordprecision: 0.00%, Teckenprecision: 0.00%
+Final_score: Ordprecision: 30.77%, Teckenprecision: 52.27%
+Hassan trying app: Ordprecision: 40.00%, Teckenprecision: 51.49%
