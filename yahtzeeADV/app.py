@@ -20,251 +20,6 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = "my_secret_key"
 
-
-# @app.route("/", methods=['GET', 'POST'])
-# def main():
-#     """
-#     Handles the main game logic for Yahtzee.
-#     """
-#     # Redirect to select-players if players are not set
-#     if 'players_queue' not in session or not session['players_queue']:
-#         return redirect(url_for('select_players'))
-#     if 'roll_counter' not in session:
-#         session['roll_counter'] = 0
-
-#     # Initialize session variables if not set
-#     initialize_session(session)
-
-#     # Get the current player
-#     players_queue = session['players_queue']
-#     current_player = players_queue[0] if players_queue else None
-#     print("Current player playing now: ", current_player)
-
-#     # Initialize player-specific data if not set
-#     if current_player not in session['player_scores']:
-#         session['player_scores'][current_player] = {
-#             'used_rules': [],  # Rules used by this player
-#             'used_rules_scores': {}  # Scores for rules used by this player
-#         }
-
-#     # Get player-specific used rules and scores
-#     used_rules = session['player_scores'][current_player]['used_rules']
-#     used_rules_scores = session['player_scores'][current_player]['used_rules_scores']
-#     session.modified = True
-
-#     rules = get_rules()
-#     hand = Hand(session['hand'])
-#     scoreboard = Scoreboard()
-#     error_message = None
-
-#     # Handle rolling dice
-#     if (request.method == 'POST'
-#             and request.form.get('chosen_dice') and session['roll_counter'] < 3):
-#         chosen_indices = [int(index)
-#                           for index in request.form.getlist('chosen_dice')]
-#         hand.roll(chosen_indices)
-#         session['roll_counter'] += 1
-#         session['hand'] = hand.to_list()
-
-#     # Handle scoring
-#     elif request.method == 'POST' and request.form.get('rule_name'):
-#         rule_name = request.form['rule_name'].replace(' ', '')
-#         # Ensure rule is not reused for the current player
-#         if rule_name in used_rules:
-#             error_message = f"Rule '{rule_name}' has already been used by {current_player}!"
-#         else:
-#             rule_class = globals().get(rule_name)
-#             if rule_class:
-#                 rule_instance = rule_class()
-#                 try:
-#                     # Calculate the score for the rule
-#                     rule_score = rule_instance.points(hand)
-#                     # Update player-specific used rules and scores
-#                     used_rules.append(rule_name)
-#                     used_rules_scores[rule_name] = rule_score
-#                     # Roll dice after scoring if the game is not over
-#                     if len(used_rules_scores) < len(rules):
-#                         hand.roll()
-#                         session['roll_counter'] = 0
-#                         session['hand'] = hand.to_list()
-#                 except ValueError as e:
-#                     error_message = str(e)
-#             else:
-#                 error_message = f"Invalid rule: {rule_name}"
-
-#     # Reset roll on GET request
-#     if request.args.get('roll'):
-#         hand.roll()
-#         session['roll_counter'] = 0
-#         session['hand'] = hand.to_list()
-
-#     # Calculate the scores for each rule (pass current_player to update_scores)
-#     update_scores(hand, rules, scoreboard, session, current_player)
-
-#     # Calculate total points for the current player
-#     total_points = sum(used_rules_scores.values())
-#     # Move to the next player
-#     players_queue.append(players_queue.pop(0))
-#     session['players_queue'] = players_queue
-
-#     # Debugging:
-#     print(f"DEBUG: Current Player = {current_player}")
-#     print(
-#         f"DEBUG: Used Rules = {session['player_scores'].get(current_player, {}).get('used_rules', 'Not Set')}")
-#     print(
-#         f"DEBUG: Used Rules Scores = {session['player_scores'].get(current_player, {}).get('used_rules_scores', 'Not Set')}")
-
-#     # Check if the game is over for the current player
-#     game_over = len(used_rules_scores) == len(rules)
-#     return render_template(
-#         'index.html',
-#         hand=hand,
-#         roll_counter=session['roll_counter'],
-#         score=scoreboard.rules_and_scores_dict,
-#         total_points=total_points,
-#         used_rules=used_rules,
-#         error_message=error_message,
-#         used_rules_scores=used_rules_scores,
-#         game_over=game_over,
-#         current_player=current_player,
-#         players=players_queue
-#     )
-
-# @app.route("/", methods=['GET', 'POST'])
-# def main():
-#     """
-#     Handles the main game logic for Yahtzee.
-#     """
-#     # Redirect to select-players if players are not set
-#     if 'players_queue' not in session or not session['players_queue']:
-#         return redirect(url_for('select_players'))
-#     if 'roll_counter' not in session:
-#         session['roll_counter'] = 0
-
-#     # Initialize session variables if not set
-#     if 'hand' not in session:
-#         session['hand'] = Hand().to_list()
-#         session['roll_counter'] = 0
-
-#         # Initialize player queue
-#         if 'players_queue' not in session:
-#             session['players_queue'] = Queue()
-
-#         # Initialize player_scores to track each player's used rules and scores
-#         if 'player_scores' not in session:
-#             session['player_scores'] = {
-#                 player: {
-#                     'used_rules': [],  # Rules used by this player
-#                     'used_rules_scores': {}  # Scores for rules used by this player
-#                 }
-#                 for player in session['players_queue']
-#             }
-
-#     # Get the current player
-#     players_queue = session['players_queue']
-#     current_player = players_queue[0] if players_queue else None
-#     print("Current player playing now: ", current_player)
-
-#     # Initialize player-specific data if not set
-#     if current_player not in session['player_scores']:
-#         session['player_scores'][current_player] = {
-#             'used_rules': [],  # Rules used by this player
-#             'used_rules_scores': {}  # Scores for rules used by this player
-#         }
-
-#     # Get player-specific used rules and scores
-#     used_rules = session['player_scores'][current_player]['used_rules']
-#     used_rules_scores = session['player_scores'][current_player]['used_rules_scores']
-#     session.modified = True
-
-#     rules = get_rules()
-#     hand = Hand(session['hand'])
-#     scoreboard = Scoreboard()
-#     error_message = None
-
-#     # Handle rolling dice
-#     if (request.method == 'POST'
-#             and request.form.get('chosen_dice') and session['roll_counter'] < 3):
-#         chosen_indices = [int(index)
-#                           for index in request.form.getlist('chosen_dice')]
-#         hand.roll(chosen_indices)
-#         session['roll_counter'] += 1
-#         session['hand'] = hand.to_list()
-
-#     # Handle scoring
-#     elif request.method == 'POST' and request.form.get('rule_name'):
-#         rule_name = request.form['rule_name'].replace(' ', '')
-#         # Ensure rule is not reused for the current player
-#         if rule_name in used_rules:
-#             error_message = f"Rule '{rule_name}' has already been used by {current_player}!"
-#         else:
-#             rule_class = globals().get(rule_name)
-#             if rule_class:
-#                 rule_instance = rule_class()
-#                 try:
-#                     # Calculate the score for the rule
-#                     rule_score = rule_instance.points(hand)
-#                     # Update player-specific used rules and scores
-#                     used_rules.append(rule_name)
-#                     used_rules_scores[rule_name] = rule_score
-#                     # Roll dice after scoring if the game is not over
-#                     if len(used_rules_scores) < len(rules):
-#                         hand.roll()
-#                         session['roll_counter'] = 0
-#                         session['hand'] = hand.to_list()
-#                 except ValueError as e:
-#                     error_message = str(e)
-#             else:
-#                 error_message = f"Invalid rule: {rule_name}"
-
-#     # Reset roll on GET request
-#     if request.args.get('roll'):
-#         hand.roll()
-#         session['roll_counter'] = 0
-#         session['hand'] = hand.to_list()
-
-#     # Calculate the scores for each rule (pass current_player to update_scores)
-#     current_player = session['players_queue'][0]
-#     # Get the current player using peek
-#     used_rules = session['player_scores'][current_player]['used_rules']
-
-#     scores = scoreboard.rules_and_scores_dict
-#     for rule in rules:
-#         rule_name = rule.name.replace(' ', '')
-#         if rule_name not in session['player_scores'][current_player]['used_rules']:
-#             score = rule.points(hand)
-#             scores[rule_name] = score
-#     scoreboard.from_dict(scores)
-
-#     # Calculate total points for the current player
-#     total_points = sum(used_rules_scores.values())
-#     # Move to the next player
-#     players_queue.append(players_queue.pop(0))
-#     session['players_queue'] = players_queue
-
-#     # Debugging:
-#     print(f"DEBUG: Current Player = {current_player}")
-#     print(
-#         f"DEBUG: Used Rules = {session['player_scores'].get(current_player, {}).get('used_rules', 'Not Set')}")
-#     print(
-#         f"DEBUG: Used Rules Scores = {session['player_scores'].get(current_player, {}).get('used_rules_scores', 'Not Set')}")
-
-#     # Check if the game is over for the current player
-#     game_over = len(used_rules_scores) == len(rules)
-#     return render_template(
-#         'index.html',
-#         hand=hand,
-#         roll_counter=session['roll_counter'],
-#         score=scoreboard.rules_and_scores_dict,
-#         total_points=total_points,
-#         used_rules=used_rules,
-#         error_message=error_message,
-#         used_rules_scores=used_rules_scores,
-#         game_over=game_over,
-#         current_player=current_player,
-#         players=players_queue
-#     )
-
 @app.route('/select-players', methods=['GET', 'POST'])
 def select_players():
     # Initialize the queue for GET requests
@@ -294,6 +49,7 @@ def main():
     """
     Handles the main game logic for Yahtzee.
     """
+    submit_pressed = session.get("submit_pressed", False)
     # Redirect to select-players if players are not set
     if 'players_queue' not in session or not session['players_queue']:
         return redirect(url_for('select_players'))
@@ -329,13 +85,13 @@ def main():
         # Rotate the queue to the next player when switching
         players_queue.append(players_queue.pop(0))
         session['players_queue'] = players_queue
-        return redirect(url_for('main'))  # Reload to reflect changes
+        return redirect(url_for('main')) 
     
     # Initialize player-specific data if not set
     if current_player not in session['player_scores']:
         session['player_scores'][current_player] = {
-            'used_rules': [],  # Rules used by this player
-            'used_rules_scores': {}  # Scores for rules used by this player
+            'used_rules': [],
+            'used_rules_scores': {} 
         }
 
     # Get player-specific used rules and scores
@@ -351,7 +107,7 @@ def main():
 
     # Handle rolling dice
     if (request.method == 'POST'
-            and request.form.get('chosen_dice') and session['roll_counter'] < 3):
+            and request.form.get('chosen_dice') and session['roll_counter'] <= 2):
         chosen_indices = [int(index)
                           for index in request.form.getlist('chosen_dice')]
         hand.roll(chosen_indices)
@@ -360,6 +116,8 @@ def main():
 
     # Handle scoring
     elif request.method == 'POST' and request.form.get('rule_name'):
+        session['submit_pressed'] = True
+        
         rule_name = request.form['rule_name'].replace(' ', '')
         # Ensure rule is not reused for the current player
         if rule_name in used_rules:
@@ -377,7 +135,6 @@ def main():
                     
                     # Mark that this turn is complete
                     turn_completed = True
-                    
                     # Roll dice after scoring if the game is not over
                     if len(used_rules) < len(rules):
                         hand.roll()
@@ -393,6 +150,7 @@ def main():
         hand.roll()
         session['roll_counter'] = 0
         session['hand'] = hand.to_list()
+        session['submit_pressed'] = False
 
     # Calculate the scores for each rule (for the current player)
     scores = scoreboard.rules_and_scores_dict
@@ -486,6 +244,7 @@ def leaderboard():
 
     leaderboard_obj, entries, total_entries, total_points = get_leaderboard_data(
         session)
+    print(entries)
     recursive_insertion(entries)
     sorted_entries = entries.print_list()
 
