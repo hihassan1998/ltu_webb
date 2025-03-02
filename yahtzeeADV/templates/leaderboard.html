@@ -1,0 +1,68 @@
+{% include 'header.html' %}
+
+<div class="container" role="home">
+    <h1>Leaderboard</h1>
+    <h3>Leaderboard Hassan's Yahtzee Game</h3>
+    <h2>⚀⚁⚂⚃⚄⚅</h2>
+    <!-- Kept for quick form submition test -->
+    <!-- <form style="background: rgb(186, 186, 186); padding:25px;" method="POST" action="/leaderboard">
+        <label for="player_name">Enter your name:</label>
+        <input type="text" id="player_name" name="player_name" required>
+        <button type="submit">Submit</button>
+        <hr>
+        <h4>
+            Total points passed from the session: {{total_points}}
+        </h4>
+    </form> -->
+
+    <div class="leaderboard-container">
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, (name, score) in entries %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ score }}</td>
+                    <td style="justify-items: center;">
+                        {% if session.get('delete_mode', False) %}
+                        <form method="POST" action="{{ url_for('delete_entry', index=index) }}">
+                            <button class=" btn btn-custom-white" type="submit">❌</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            <tfoot>
+                <tr style="background-color: #d4d2d2; font-size:2rem;">
+                    <td colspan="2"><strong>Total Entries:</strong></td>
+                    <td colspan="1">{{ total_entries }}</td>
+                </tr>
+                <tr>
+                    <td style="justify-items: center;">
+                        <form method="POST" action="{{ url_for('delete_mode') }}">
+                            <button class="btn btn-custom-black" type="submit">
+                                {% if session.get('delete_mode', False) %}
+                                Cancel Deleting
+                                {% else %}
+                                Delete Users
+                                {% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tfoot>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<hr>
+
+
+{% include 'footer.html' %}

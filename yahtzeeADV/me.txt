@@ -1,0 +1,5 @@
+från /oop:
+source .venv/bin/activate 
+deactivate.varsomhelst
+
+cp -r me/kmom03/yahtzee2/. me/kmom04/yahtzee3

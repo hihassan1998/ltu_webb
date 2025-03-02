@@ -1,0 +1,427 @@
+# #!/usr/bin/env python3
+# # -*- coding: UTF-8 -*-
+# """
+# Minimal Yatzee Flask application, including useful error handlers.
+# """
+# import traceback
+# from flask import Flask, render_template, request, session, redirect
+# from src.hand import Hand
+# from src.rules import Ones, Twos, Threes, Fours, Fives, Sixes, Yahtzee
+# from src.rules import ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Chance
+# # import random
+# from src.scoreboard import Scoreboard
+# # from src.rules import Rule
+
+# app = Flask(__name__)
+# app.debug = True
+# app.secret_key = "your_secret_key"
+
+
+# @app.route("/", methods=['GET', 'POST'])
+# def main():
+#     rules = [
+#         Ones(), Twos(), Threes(), Fours(), Fives(), Sixes(),
+#         ThreeOfAKind(), FourOfAKind(), FullHouse(), SmallStraight(),
+#         LargeStraight(), Chance(), Yahtzee()
+#     ]
+#     # Ensure session has a hand stored and roll counter initialized
+#     if 'hand' not in session:
+#         session['hand'] = Hand().to_list()
+#         session['roll_counter'] = 0
+#         session['used_rules'] = []
+#         session['used_rules_scores'] = {}
+#     if 'used_rules' not in session:
+#         session['used_rules'] = []
+
+#     # Create hand using stored values
+#     hand = Hand(session['hand'])
+#     print("Hand before rolling: (initially)", hand.to_list())
+#     scoreboard = Scoreboard()
+#     error_message = None
+
+#     # Handle rolling dice
+#     if (request.method == 'POST' and request.form.get('chosen_dice')
+#             and session['roll_counter'] < 3):
+#         chosen_indices = [int(index)
+#                           for index in request.form.getlist('chosen_dice')]
+#         hand.roll(chosen_indices)
+#         session['roll_counter'] += 1
+#         # Update session with the new hand after rolling
+#         session['hand'] = hand.to_list()
+#         print(
+#             f"Values of dice in session after selecting dice and rolling: {session['hand']}")
+
+#     # Handle scoring
+#     elif request.method == 'POST' and request.form.get('rule_name'):
+
+#         rule_name = request.form['rule_name']
+
+#         # Ensure rule is not reused by checking session['used_rules']
+#         if rule_name in session['used_rules']:
+#             error_message = f"Rule '{rule_name}' has already been used!"
+#             # return render_template('index.html',
+#             #                        error_message=error_message,
+#             #                        hand=hand, roll_counter=session['roll_counter'],
+#             #                        score=scoreboard.rules_and_scores_dict,
+#             #                        used_rules=session['used_rules'])
+
+#         rule_name = rule_name.replace(" ", "")
+#         rule_class = globals().get(rule_name)
+#         # print("Available globals:", list(globals().keys()))
+#         # print(f"Checking rule_name: {rule_name}")
+#         # print(f"Fetched rule_class from globals(): {rule_class}")
+#         if rule_class:
+#             print("Rules class logic initalted")
+#             rule_instance = rule_class()
+#             try:
+#                 rule_score = scoreboard.get_points(
+#                     rule_name)
+#                 # Add points to the scoreboard
+#                 scoreboard.add_points(rule_name, hand)
+#                 # Add rule to used_rules in session
+#                 session['used_rules'].append(rule_name)
+
+#                 # Only update used_rules_scores dictionary if it's a new rule
+#                 if rule_name not in session['used_rules_scores']:
+#                     # Calculate the score for the rule
+#                     rule_score = rule_instance.points(hand)
+#                     # Store the rule and score
+#                     session['used_rules_scores'][rule_name] = rule_score
+#             except ValueError as e:
+#                 error_message = str(e)
+#                 # return render_template('index.html',
+#                 #                        error_message=error_message,
+#                 #                        hand=hand,
+#                 #                        roll_counter=session['roll_counter'],
+#                 #                        score=scoreboard.rules_and_scores_dict,
+#                 #                        used_rules=session['used_rules'])
+
+#     # Reset roll
+#     if request.args.get('roll'):
+#         print("Rolling dice again from GET method...")
+#         hand.roll()
+#         session['roll_counter'] = 0
+#         session['hand'] = hand.to_list()
+
+#     print("Hand after rolling:", hand.to_list())
+#     session['hand'] = hand.to_list()
+
+#     scores = scoreboard.rules_and_scores_dict
+#     print("Existing scores from scoreboard:", scores)
+
+#     # Calculate the scores for each rule
+#     for rule in rules:
+#         rule_name = rule.name
+#         if rule_name not in session['used_rules']:
+#             score = rule.points(hand)
+#             print(f"{rule_name}: {score}")
+#             scores[rule_name] = score
+
+#     # Update the scoreboard with calculated scores
+#     scoreboard.from_dict(scores)
+
+#     print("The used rules at this roll:", session['used_rules'])
+#     print("The used_rules_scores(DICT) at this roll:",
+#           session['used_rules_scores'])
+#     print("\n<The 'scores' from available dice on screen>:", scores, "\n")
+
+#     # Calculate the total points from the used_rules_scores
+#     # Sum the values of the dictionary
+#     total_points = sum(session['used_rules_scores'].values())
+#     # Update the scoreboard with the rules and their corresponding scores
+#     scoreboard.from_dict(session['used_rules_scores'])
+#     print("Total points from used rules:", total_points)
+
+#     game_over = len(session['used_rules_scores']) == len(rules)
+
+#     return render_template(
+#         'index.html',
+#         hand=hand,
+#         roll_counter=session['roll_counter'],
+#         score=scoreboard.rules_and_scores_dict,
+#         total_points=total_points,
+#         used_rules=session['used_rules'],
+#         error_message=error_message,
+#         used_rules_scores=session['used_rules_scores'],
+#         game_over=game_over
+#     )
+
+
+# @app.route("/reset")
+# def reset():
+#     """
+#     Reset the game session to start a new game.
+#     """
+#     session.clear()
+#     return redirect("/")
+
+
+# @app.route("/about")
+# def about():
+#     """
+#     Route for the about page
+#     """
+#     return render_template("about.html")
+
+
+# @app.errorhandler(404)
+# def page_not_found(e):
+#     """
+#     Handler for page not found 404
+#     """
+#     # pylint: disable=unused-argument
+#     return "Flask 404 here, but not the page you requested."
+
+
+# @app.errorhandler(500)
+# def internal_server_error(e):
+#     """
+#     Handler for internal server error 500
+#     """
+#     # pylint: disable=unused-argument
+#     return "<p>Flask 500<pre>" + traceback.format_exc()
+
+
+# if __name__ == "__main__":
+#     app.run()
+
+
+# made minor changes and might need to revert to this functional code if need in upcoming kmoms
+
+
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+"""
+Minimal Yatzee Flask application, including useful error handlers.
+"""
+import traceback
+from flask import Flask, render_template, request, session, redirect
+from src.hand import Hand
+from src.rules import Ones, Twos, Threes, Fours, Fives, Sixes, Yahtzee
+from src.rules import ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Chance
+# import random
+from src.scoreboard import Scoreboard
+# import src.rules
+from src.game_helpers import initialize_session, update_scores, get_leaderboard_data
+from src.unorderedlist import UnorderedList
+from pathlib import Path
+from src.leaderboard import Leaderboard
+
+app = Flask(__name__)
+app.debug = True
+app.secret_key = "my_secret_key"
+
+
+@app.route('/leaderboard', methods=['GET'])
+def leaderboard():
+    # Get leaderboard data
+    leaderboard, entries, total_entries, total_points = get_leaderboard_data()
+
+    return render_template(
+        "leaderboard.html",
+        total_points=total_points,
+        leaderboard=leaderboard,  
+        entries=entries,
+        total_entries=total_entries  # Pass total entries to template
+    )
+
+@app.route('/leaderboard', methods=['POST'])
+def add_entry():
+    # Get leaderboard data
+    leaderboard, entries, total_entries, total_points = get_leaderboard_data()
+
+    player_name = request.form['player_name']  # Get player name from form
+    
+    # Add new entry and save it
+    leaderboard.add_entry(player_name, total_points)
+    leaderboard.save(Path("leaderboard.txt"))
+
+    return redirect('/leaderboard')  # Redirect to the GET route to show updated leaderboard
+
+@app.route("/", methods=['GET', 'POST'])
+def main():
+    """
+    Handles the main game logic for Yahtzee.
+    It processes dice rolls, scoring, and updates the session.
+    It initializes the game, rolls dice based on user input,
+    calculates scores, and ends the game when all rules are scored.
+
+    Returns:
+        str: Renders HTML template for the Yahtzee game.
+    """
+    rules = get_rules()
+    initialize_session(session)
+
+    # Create hand using stored values
+    hand = Hand(session['hand'])
+    # print("Initial dice values:", hand)
+    scoreboard = Scoreboard()
+    error_message = None
+
+    # Handle rolling dice
+    if (request.method == 'POST'
+            and request.form.get('chosen_dice') and session['roll_counter'] < 3):
+        chosen_indices = []
+        for index in request.form.getlist('chosen_dice'):
+            chosen_indices.append(int(index))
+        # print("chose indices:", chosen_indices)
+        hand.roll(chosen_indices)
+        session['roll_counter'] += 1
+        session['hand'] = hand.to_list()
+
+    # Handle scoring
+    elif request.method == 'POST' and request.form.get('rule_name'):
+        rule_name = request.form['rule_name'].replace(' ', '')
+
+        # Ensure rule is not reused
+        if rule_name in session['used_rules']:
+            # print("Rule name from post duplicate error:", rule_name)
+            error_message = f"Rule '{rule_name}' has already been used!"
+        else:
+            rule_class = globals().get(rule_name)
+
+            if rule_class:
+                rule_instance = rule_class()
+                try:
+                    # Calculate the score for the rule
+                    rule_score = rule_instance.points(hand)
+
+                    # Update session data
+                    session['used_rules'].append(rule_name)
+                    session['used_rules_scores'][rule_name] = rule_score
+
+                    # Roll dice after scoring if the game is not over
+                    if len(session['used_rules_scores']) < len(rules):
+                        hand.roll()
+                        session['roll_counter'] = 0
+                        session['hand'] = hand.to_list()
+                        # print("After new roll values:", session['hand'])
+
+                except ValueError as e:
+                    error_message = str(e)
+            else:
+                error_message = f"Invalid rule: {rule_name}"
+    # Reset roll
+    if request.args.get('roll'):
+        print("Rolling dice again from GET method...")
+        hand.roll()
+        session['roll_counter'] = 0
+        session['hand'] = hand.to_list()
+    # Calculate the scores for each rule
+    update_scores(hand, rules, scoreboard, session)
+
+    # Calculate total points
+    total_points = sum(session['used_rules_scores'].values())
+    game_over = len(session['used_rules_scores']) == len(rules)
+    # # DDEBUGG
+    # print("Used rules:", session['used_rules'])
+    # print("Used rules scores:", session['used_rules_scores'])
+    # print("Ending roll dice values:", hand)
+
+    return render_template(
+        'index.html',
+        hand=hand,
+        roll_counter=session['roll_counter'],
+        score=scoreboard.rules_and_scores_dict,
+        total_points=total_points,
+        used_rules=session['used_rules'],
+        error_message=error_message,
+        used_rules_scores=session['used_rules_scores'],
+        game_over=game_over
+    )
+
+
+def get_rules():
+    """
+    A helper fuction that returns a list of rule instances for the Yahtzee game.
+
+    Returns:
+        list: List of rule objects.
+    """
+    return [
+        Ones(), Twos(), Threes(), Fours(), Fives(), Sixes(),
+        ThreeOfAKind(), FourOfAKind(), FullHouse(), SmallStraight(),
+        LargeStraight(), Chance(), Yahtzee()
+    ]
+
+
+@app.route("/reset")
+def reset():
+    """
+    Reset the game session to start a new game.
+    """
+    session.clear()
+    # return redirect("/~hahi24/dbwebb-kurser/oopython/me/kmom04/yahtzee3/app.cgi")
+    return redirect("/")
+
+
+@app.route("/about")
+def about():
+    """
+    Route for the about page
+    """
+    return render_template("about.html")
+
+
+@app.route("/addPlayer")
+def addPlayer():
+    """
+    Route for the leaderboard page
+    """
+    return render_template("leaderboard.html")
+
+
+# @app.route("/leaderboard")
+# def leaderboard():
+#     """
+#     Route for the leaderboard page
+#     """
+#     cwd = Path.cwd()
+#     highscores_file = cwd / "leaderboard.txt"
+#     # leaderboard_data = leaderboard.load(highscores_file)
+#     # Instance of unordered list
+#     ulList = UnorderedList()
+
+#     # Add items
+#     ulList.add("A")
+#     ulList.add("B")
+#     ulList.add("C")
+#     ulList.get(1)
+#     # Get an item
+#     print('Printing the item in ulList: ',ulList.get(1))
+#     ulList_data = list(enumerate(ulList))
+#     # remove an item
+#     # print(ulList.remove(1))
+#     simple_list = ulList.get(1)
+#     # Get updated list
+#     print(ulList)
+#     leaderboard = Leaderboard()
+#     # leaderboard.load("leaderboard.txt")
+#     leaderboard.load(highscores_file)
+#     entries = leaderboard.print_leaderboard()
+#     return render_template("leaderboard.html", leaderboard=leaderboard, entries=entries, unList=ulList_data)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """
+    Handler for page not found 404
+    """
+    # pylint: disable=unused-argument
+    return "Flask 404 here, but not the page you requested."
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    """
+    Handler for internal server error 500
+    """
+    # pylint: disable=unused-argument
+    return "<p>Flask 500<pre>" + traceback.format_exc()
+
+
+if __name__ == "__main__":
+    app.run()
+
+
+# made minor changes and might need to revert to this functional code if need in upcoming kmoms

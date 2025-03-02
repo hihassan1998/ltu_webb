@@ -1,0 +1,48 @@
+{% include 'header.html' %}
+
+<div class="container" role="main">
+    <div class="page-header">
+        <h1>About Us</h1>
+        <p>
+            This Yahtzee game is an object-oriented Python project that implements the game's international rules and
+            logic. The goal is to practice design patterns, class management, and algorithm efficiency through a
+            practical application of object-oriented principles.
+        </p>
+        
+        <p id="">
+            <strong>Game Rules:</strong><br>
+            <strong>Ones:</strong> Sum of all ones rolled.<br>
+            <strong>Twos:</strong> Sum of all twos rolled.<br>
+            <strong>Threes:</strong> Sum of all threes rolled.<br>
+            <strong>Fours:</strong> Sum of all fours rolled.<br>
+            <strong>Fives:</strong> Sum of all fives rolled.<br>
+            <strong>Sixes:</strong> Sum of all sixes rolled.<br>
+            <strong>Three of a Kind:</strong> If at least three dice show the same number, sum of all dice.<br>
+            <strong>Four of a Kind:</strong> If at least four dice show the same number, sum of all dice.<br>
+            <strong>Full House:</strong> Three of one number and two of another (e.g., 3-3-3-2-2) → 25 points.<br>
+            <strong>Small Straight:</strong> Four consecutive numbers (e.g., 1-2-3-4) → 30 points.<br>
+            <strong>Large Straight:</strong> Five consecutive numbers (e.g., 2-3-4-5-6) → 40 points.<br>
+            <strong>Yahtzee:</strong> All five dice show the same number → 50 points.<br>
+            <strong>Chance:</strong> Sum of all dice (any combination).<br>
+            <strong>x x x x x x x x x x x x x x x x x </strong> <br>
+            <strong>x x x x x x x x x x x x x x </strong> <br>
+            <strong>x x x x x x x x x x </strong> <br>
+            <strong>x x x x x x x </strong> <br>
+            <strong>x x x x  </strong> <br>
+            <strong>x x x  </strong> <br>
+            <!-- <strong>x x  </strong> <br> -->
+            <strong>x   </strong> <br>
+        </p>
+        
+        <img src="{{ url_for('static',filename='img/dice.jpg') }}" width="256">
+        
+        <p>Skapat av Hassan Hussain (HIH)</p>
+        <p>
+            Akronym: hahi24
+        </p>
+
+    </div>
+</div>
+
+
+{% include 'footer.html' %}

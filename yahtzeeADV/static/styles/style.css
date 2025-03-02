@@ -1,0 +1,246 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4em !important;
+    padding-bottom: 2em !important;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+.page-header {
+    margin: 75px 0 20px !important;
+}
+
+main {
+    flex: 1;
+    padding: 25px;
+}
+
+h1 {
+    font-family: fantasy;
+}
+
+.dice-container-mini {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+/* Container stylings start */
+.dice-container img {
+    width: 75px;
+    margin: 10px;
+    opacity: 0;
+    animation: fadeIn 1s ease-in-out forwards;
+    animation-delay: 0.5s;
+}
+
+/* fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.dice-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #000;
+    /* Black color */
+    transform: scale(1.3);
+    margin-top: 5px;
+}
+
+#game-rules {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+.dice-container {
+    opacity: 0;
+}
+
+.dice-container img {
+    cursor: pointer;
+}
+
+.dice-image:hover {
+    transform: scale(1.2);
+}
+
+.dice-container img.selected {
+    cursor: pointer;
+    transform: scale(1.2);
+    padding: 1px;
+    border: 5px solid gray;
+    border-radius: 5px;
+}
+
+/* Delay between dice fading in */
+.dice-container img:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.dice-container img:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.dice-container img:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.dice-container img:nth-child(4) {
+    animation-delay: 0.8s;
+}
+
+.dice-container img:nth-child(5) {
+    animation-delay: 1s;
+}
+
+/* Apply the fade-in animation to the dice container */
+.dice-container {
+    animation: fadeIn 1s ease-in-out forwards;
+    opacity: 0;
+}
+
+/* Container stylings end */
+
+/* buttons styling */
+.btn-custom-black {
+    margin-top: 25px;
+    background-color: gray;
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 5px;
+    border: 2px solid black;
+}
+
+.btn-custom-white {
+    margin-top: 25px;
+    background-color: #fecaca;
+    color: #fff;
+    padding: 10px 10px;
+    border-radius: 50%;
+    border: 3px solid rgb(255, 0, 0);
+}
+
+.btn-custom-white:hover {
+    color: black;
+    background-color: white;
+    font-weight: 900;
+    transform: scale(1.1);
+    border: 4px solid rgb(255, 0, 0);
+    transition: transform 0.3s ease;
+
+}
+
+.btn-custom-black:hover {
+    color: black;
+    background-color: white;
+    font-weight: 900;
+}
+
+/* footer stylings */
+footer {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0 auto;
+    padding: 10px;
+    background: #f8f9fa;
+}
+
+/* table stylings */
+table {
+    /* width: 50%; */
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+    border: 5px solid #333;
+    border-radius: 25px;
+    padding: 25px;
+}
+
+th,
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr {
+    border: 1px solid #333;
+}
+
+tr:hover {
+    background-color: #f2f2f2;
+}
+
+.hoverable:hover {
+    cursor: pointer;
+}
+
+.game-contianer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    /* gap: 50px; */
+}
+
+@media (max-width: 768px) {
+    .game-contianer {
+        display: flex;
+        flex-direction: column !important;
+        gap: 50px;
+    }
+
+    .dice-container img {
+        width: 50px;
+    }
+
+    main {
+        padding: 0px;
+    }
+}
+
+.game-contianer-col {
+    display: flex;
+    flex-direction: row;
+}
+
+/* laderboard stylings */
+
+.leaderboard-table {
+    border: solid 5px #333;
+    background-color: #f5f5f5;
+
+}
+
+.leaderboard-container {
+    display: flex;
+    justify-content: center;
+}
