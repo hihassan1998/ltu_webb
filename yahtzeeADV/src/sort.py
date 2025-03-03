@@ -35,19 +35,27 @@ def insertion_sort(unordered_list):
 
 def recursive_insertion(unordered_list, n=None):
     """Recursively sorts the UnorderedList using insertion sort."""
+
     if n is None:
         n = unordered_list.size()
+    # Base case
     if n <= 1:
         return
+    # Recursive sort
     recursive_insertion(unordered_list, n - 1)
 
     key = unordered_list.get(n - 1)
     j = n - 2
 
-    # Directly compare the values (for both integers and strings)
-    while j >= 0 and unordered_list.get(j)[1] > key[1]:
-        # MAKE CHANGES HERE AT THE SPECIFIED INDEX
-        unordered_list.set(j + 1, unordered_list.get(j))
-        j -= 1
+    # Check if the elements are tuples ('str', int) or simple lists
+    if isinstance(key, tuple):
+        # Compare based on the integer value in the tuple (key[1])
+        while j >= 0 and unordered_list.get(j)[1] > key[1]:
+            unordered_list.set(j + 1, unordered_list.get(j))
+            j -= 1
+    else:
+        while j >= 0 and unordered_list.get(j) > key:
+            unordered_list.set(j + 1, unordered_list.get(j))
+            j -= 1
 
     unordered_list.set(j + 1, key)

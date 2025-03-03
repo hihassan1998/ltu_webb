@@ -10,15 +10,17 @@ from src.hand import Hand
 from src.rules import Ones, Twos, Threes, Fours, Fives, Sixes, Yahtzee
 from src.rules import ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Chance
 from src.scoreboard import Scoreboard
-from src.game_helpers import initialize_session, update_scores, get_leaderboard_data
+from src.game_helpers import initialize_session, update_scores, get_leaderboard_data,is_game_over
 from src.leaderboard import Leaderboard
 from src.sort import recursive_insertion
 from src.queue import Queue
 from src.player import Player
+from src.unorderedlist import UnorderedList
 
 app = Flask(__name__)
 app.debug = True
 app.secret_key = "my_secret_key"
+
 
 @app.route('/select-players', methods=['GET', 'POST'])
 def select_players():
@@ -49,65 +51,20 @@ def main():
     """
     Handles the main game logic for Yahtzee.
     """
-    submit_pressed = session.get("submit_pressed", False)
     # Redirect to select-players if players are not set
     if 'players_queue' not in session or not session['players_queue']:
         return redirect(url_for('select_players'))
-    if 'roll_counter' not in session:
-        session['roll_counter'] = 0
-
-    # Initialize session variables if not set
-    if 'hand' not in session:
-        session['hand'] = Hand().to_list()
-        session['roll_counter'] = 0
-
-        # Initialize player queue
-        if 'players_queue' not in session:
-            session['players_queue'] = Queue()
-
-        # Initialize player_scores to track each player's used rules and scores
-        if 'player_scores' not in session:
-            session['player_scores'] = {
-                player: {
-                    'used_rules': [],  # Rules used by this player
-                    'used_rules_scores': {}  # Scores for rules used by this player
-                }
-                for player in session['players_queue']
-            }
-
-    # Get the current player
-    players_queue = session['players_queue']
-    current_player = players_queue[0] if players_queue else None
-    print("Current player playing now: ", current_player)
     
-    # Handle player switching when button is pressed
-    if request.method == 'POST' and request.form.get('switch_player'):
-        # Rotate the queue to the next player when switching
-        players_queue.append(players_queue.pop(0))
-        session['players_queue'] = players_queue
-        return redirect(url_for('main')) 
-    
-    # Initialize player-specific data if not set
-    if current_player not in session['player_scores']:
-        session['player_scores'][current_player] = {
-            'used_rules': [],
-            'used_rules_scores': {} 
-        }
-
-    # Get player-specific used rules and scores
-    used_rules = session['player_scores'][current_player]['used_rules']
-    used_rules_scores = session['player_scores'][current_player]['used_rules_scores']
-    session.modified = True
+    used_rules,used_rules_scores,current_player,players_queue = initialize_session(session)
 
     rules = get_rules()
     hand = Hand(session['hand'])
     scoreboard = Scoreboard()
     error_message = None
-    turn_completed = False  # Flag to track when a turn is completed
 
     # Handle rolling dice
     if (request.method == 'POST'
-            and request.form.get('chosen_dice') and session['roll_counter'] <= 2):
+            and request.form.get('chosen_dice') and session['roll_counter'] < 3):
         chosen_indices = [int(index)
                           for index in request.form.getlist('chosen_dice')]
         hand.roll(chosen_indices)
@@ -116,8 +73,9 @@ def main():
 
     # Handle scoring
     elif request.method == 'POST' and request.form.get('rule_name'):
-        session['submit_pressed'] = True
-        
+        if session.get('must_switch', False):
+            error_message = "You must switch players before submitting a new score!"
+
         rule_name = request.form['rule_name'].replace(' ', '')
         # Ensure rule is not reused for the current player
         if rule_name in used_rules:
@@ -132,12 +90,12 @@ def main():
                     # Update player-specific used rules and scores
                     used_rules.append(rule_name)
                     used_rules_scores[rule_name] = rule_score
-                    
                     # Mark that this turn is complete
-                    turn_completed = True
+                    session['must_switch'] = True
                     # Roll dice after scoring if the game is not over
                     if len(used_rules) < len(rules):
                         hand.roll()
+                        print("hand:", hand)
                         session['roll_counter'] = 0
                         session['hand'] = hand.to_list()
                 except ValueError as e:
@@ -145,46 +103,39 @@ def main():
             else:
                 error_message = f"Invalid rule: {rule_name}"
 
-    # Reset roll on GET request
-    if request.args.get('roll'):
-        hand.roll()
-        session['roll_counter'] = 0
-        session['hand'] = hand.to_list()
-        session['submit_pressed'] = False
-
     # Calculate the scores for each rule (for the current player)
-    scores = scoreboard.rules_and_scores_dict
-    for rule in rules:
-        rule_name = rule.name.replace(' ', '')
-        if rule_name not in used_rules:  # Using current player's used_rules
-            score = rule.points(hand)
-            scores[rule_name] = score
-    scoreboard.from_dict(scores)
+    update_scores(hand, rules, scoreboard, session, current_player)
+    # scores = scoreboard.rules_and_scores_dict
+    # for rule in rules:
+    #     rule_name = rule.name.replace(' ', '')
+    #     if rule_name not in used_rules:
+    #         score = rule.points(hand)
+    #         scores[rule_name] = score
+    # scoreboard.from_dict(scores)
 
-    # Calculate total points for the current player
-    total_points = sum(used_rules_scores.values())
-    
     # Ensure the session player_scores is updated before rotating
     session['player_scores'][current_player]['used_rules'] = used_rules
     session['player_scores'][current_player]['used_rules_scores'] = used_rules_scores
-    
-    # IMPORTANT: Move to the next player ONLY if a turn was completed
-    # AND do this as the very last step before rendering
-    if turn_completed:
-        # Rotate the queue to the next player
-        players_queue.append(players_queue.pop(0))
-        session['players_queue'] = players_queue
-    
-    # Ensure session is marked as modified
-    session.modified = True
-    
+
+    # Calculate total points for the current player
+    # print("format to add total points: ", used_rules_scores)
+    total_points = sum(used_rules_scores.values())
+    # print(total_points)
+
     # Debugging:
-    print(f"DEBUG: Current Player = {current_player}")
-    print(f"DEBUG: Used Rules = {session['player_scores'].get(current_player, {}).get('used_rules', 'Not Set')}")
-    print(f"DEBUG: Used Rules Scores = {session['player_scores'].get(current_player, {}).get('used_rules_scores', 'Not Set')}")
-    
-    # Check if the game is over for the current player
-    game_over = len(used_rules) == len(rules)
+    # print(f"DEBUG: Current Player = {current_player}")
+    # print(
+    #     f"DEBUG: Used Rules = {session['player_scores'].get(current_player, {}).get('used_rules', 'Not Set')}")
+    # print(
+    #     f"DEBUG: Used Rules Scores = {session['player_scores'].get(current_player, {}).get('used_rules_scores', 'Not Set')}")
+    # Check if the game is over for all players
+    game_over=is_game_over(players_queue, session, rules)
+    # game_over = all(len(session['player_scores'][player]['used_rules']) == len(rules) for player in players_queue)
+    # highest_total_points = max(
+    #     sum(session['player_scores'][player]['used_rules_scores'].values()) for player in players_queue
+    # )
+    highest_total_points, player_with_highest = get_highest_total_points_and_player(players_queue, session)
+    print(highest_total_points,"the player who has this score:", player_with_highest)
     
     return render_template(
         'index.html',
@@ -194,13 +145,44 @@ def main():
         total_points=total_points,
         used_rules=used_rules,
         error_message=error_message,
-        used_rules_scores=used_rules_scores,
+        used_rules_scores=session['player_scores'][current_player]['used_rules_scores'],
         game_over=game_over,
         current_player=current_player,
-        players=players_queue
+        players=players_queue,
+        highest_total_points=highest_total_points,
+        player_with_highest=player_with_highest,
+        must_switch=session.get('must_switch', False)
     )
 
+def get_highest_total_points_and_player(players_queue, session):
+    """
+    Calculates the highest total points and the player who has that score.
+    """
+    highest_total_points = 0
+    player_with_highest = None
+    
+    for player in players_queue:
+        player_total_points = sum(session['player_scores'][player]['used_rules_scores'].values())
+        if player_total_points > highest_total_points:
+            highest_total_points = player_total_points
+            player_with_highest = player
 
+    return highest_total_points, player_with_highest
+
+
+
+@app.route("/switch_player", methods=['POST'])
+def switch_player():
+    """
+    Handles switching to the next player.
+    """
+    if 'players_queue' in session and session['players_queue']:
+        # Rotate the queue to the next player
+        session['players_queue'].append(session['players_queue'].pop(0))
+        session['must_switch'] = False
+        session.modified = True
+
+    return redirect(url_for('main'))
 
 
 def get_rules():
@@ -244,15 +226,17 @@ def leaderboard():
 
     leaderboard_obj, entries, total_entries, total_points = get_leaderboard_data(
         session)
-    print(entries)
+
+    print("List of entries obj -> list: ", list(entries))
+
+    # Recursively sort the UnorderedList (entries)
     recursive_insertion(entries)
-    sorted_entries = entries.print_list()
+    print("After recursion: ", list(entries))
 
     sorted_entries_with_index = []
     for index, entry in enumerate(entries):
         sorted_entries_with_index.append((index, entry))
-    print(sorted_entries)
-    print(sorted_entries_with_index)
+
     return render_template(
         "leaderboard.html",
         total_points=total_points,
@@ -271,6 +255,20 @@ def delete_mode():
     return redirect(url_for('leaderboard'))
 
 
+@app.route('/leaderboard/<int:index>', methods=['POST'])
+def delete_entry(index):
+    """
+    Delete a specific leaderboard entry at its index.
+    """
+    leaderboard_obj = Leaderboard.load("leaderboard.txt")
+    
+    recursive_insertion(leaderboard_obj.entries)
+    
+    leaderboard_obj.remove_entry(index)
+
+    return redirect(url_for('leaderboard'))
+
+
 @app.route('/leaderboard', methods=['POST'])
 def add_entry():
     """
@@ -279,22 +277,12 @@ def add_entry():
     leaderboard_obj, _, _, total_points = get_leaderboard_data(session)
 
     player_name = request.form['player_name']
-
+    # only ad the score of maximum points from both paleyrs
+    # highscore = max(totalpoints1,totalpoints2)
     leaderboard_obj.add_entry(player_name, total_points)
     leaderboard_obj.save(Path("leaderboard.txt"))
 
     session['player_name_submitted'] = True
-
-    return redirect(url_for('leaderboard'))
-
-
-@app.route('/leaderboard/<int:index>', methods=['POST'])
-def delete_entry(index):
-    """
-    Delete a specific leaderboard entry at its index.
-    """
-    leaderboard_obj = Leaderboard.load("leaderboard.txt")
-    leaderboard_obj.remove_entry(index)
 
     return redirect(url_for('leaderboard'))
 

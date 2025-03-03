@@ -46,8 +46,10 @@
                 Straight, Yahtzee, Chance. <br><br>
                 See the <a href="/about">About page</a> for details.
             </p>
-            <button id="roll-dice" class="btn btn-custom-black" {% if game_over %}disabled{% endif %}>Roll Dice
-                🎲</button>
+            <button id="roll-dice" class="btn btn-custom-black" {% if game_over %}disabled{% endif %}>
+                Roll Dice
+                🎲
+            </button>
             {% endif %}
 
         </div>
@@ -79,8 +81,9 @@
                                 </td>
                                 <td>
                                     {% if rule_name not in used_rules %}
-                                    <input class="hoverable dice-checkbox" type="radio" name="rule_name"
-                                        value="{{ rule_name }}" id="rule-{{ rule_name }}">
+                                    <input class="hoverable dice-checkbox" type="radio" name="rule_name" {% if
+                                        must_switch %}disabled{% endif %} value="{{ rule_name }}"
+                                        id="rule-{{ rule_name }}">
                                     <label> (Value: {{ points }})</label>
                                     {% else %}
                                     <span>Already Scored</span>
@@ -98,14 +101,20 @@
                     </table>
                 </div>
                 {% if not game_over %}
+                {% if not must_switch %}
                 <button type="submit" class="btn btn-custom-black">Submit Score</button>
-                <form method="POST" action="{{ url_for('main') }}">
-                    <button type="submit" name="switch_player" class="btn btn-custom-black">
-                        Switch Player
-                    </button>
-                </form>
+                {% endif %}
+
                 {% endif %}
             </form>
+            <h2>Current Player: {{ current_player }}</h2>
+            {% if must_switch %}
+            <form method="POST" action="{{ url_for('switch_player') }}">
+                <button type="submit" name="switch_player" class="btn btn-custom-black">
+                    Next Turn
+                </button>
+            </form>
+            {% endif %}
             {% else %}
             <br><br>
             <p><strong>Note:</strong> No dice data passing through to the frontend, therefore no score data to
@@ -124,7 +133,8 @@
 
 
     {% if game_over and not session.get('player_name_submitted', False) %}
-    <h2>Game Over! Your final score: {{ total_points }}</h2>
+    <h2> <b>Game Over! </b> Your final score: {{ highest_total_points }}</h2>
+    <h2 style="color: green; ">The 'WIINNER' is <b> {{player_with_highest}}</b></h2>
     <br>
     <br>
     <form method="POST" action="{{ url_for('leaderboard') }}">
@@ -157,7 +167,6 @@
                 let newContent = $(data);
                 $('#dice-container').html(newContent.find('#dice-container').html());
                 $('#total-points').html(newContent.find('#total-points').html());
-                $('#scores-raw').html(newContent.find('#scores-raw').html());
             });
         });
     });

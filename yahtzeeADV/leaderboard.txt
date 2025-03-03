@@ -1,9 +1,9 @@
-trackmax,123
-cccc,73
-fiftySeven,57
-FInal try end remove,80
-Hassan,90
-Added restart btn,143
-Hassan,39
-final check,0
-game over for player 1,108
+one,11
+two ,22
+thre,33
+four,44
+five,55
+Player 1 won,136
+player 1 score,120
+Hassan Ishfaq Hussain,157
+player two won,78
