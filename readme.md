@@ -45,6 +45,7 @@ Text Processing 📝
 
 ####  Visual Overview
 
+![82](https://github.com/user-attachments/assets/b5d66a05-5992-4813-b08d-c044a052e408)
 
 ### Binary Search Tree (Located in binarySearchTree/)
 This project contains the implementation of a flexible Binary Search Tree **(BST)**, with two primary classes: Node and BinarySearchTree.
